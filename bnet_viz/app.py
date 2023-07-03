@@ -3,32 +3,58 @@ from typing import Any
 
 from pathlib import Path
 
-from litestar import Litestar, get, MediaType
-from litestar.response import Template
+from litestar import Litestar
+
 from litestar.contrib.jinja import JinjaTemplateEngine
 from litestar.template.config import TemplateConfig
 from litestar.static_files.config import StaticFilesConfig
 from litestar.config.cors import CORSConfig
+from litestar.logging import LoggingConfig
 
-# @get("/")
-# async def index() -> Template:
-#     print("found route")
-#     return Template(template_name="index.html")
+from .bnet_connector import register_bnet_server
+
+from litestar.datastructures import State
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from litestar.types import Scope
+
+init_state = State({"key": "value"})
 
 
-# @get("/async")
-# async def async_hello_world() -> dict[str, Any]:
-#     """Route Handler that outputs hello world."""
-#     await sleep(0.1)
-#     return {"hello": "world"}
+logging_config = LoggingConfig(
+    loggers={
+        "my_app": {
+            "level": "INFO",
+            "handlers": ["queue_listener"],
+        }
+    }
+)
+
+import logging
+
+logger = logging.getLogger()
 
 
-# @get("/sync", sync_to_thread=False)
-# def sync_hello_world() -> dict[str, Any]:
-#     """Route Handler that outputs hello world."""
-#     return {"hello": "world"}
+async def after_exception_handler(exc: Exception, scope: "Scope") -> None:
+    """Hook function that will be invoked after each exception."""
+    state = scope["app"].state
+    if not hasattr(state, "error_count"):
+        state.error_count = 1
+    else:
+        state.error_count += 1
+
+    logger.info(
+        "an exception of type %s has occurred for requested path %s and the application error count is %d.",
+        type(exc).__name__,
+        scope["path"],
+        state.error_count,
+    )
+
 
 app = Litestar(
+    on_app_init=[register_bnet_server],
     route_handlers=[],
     template_config=TemplateConfig(
         directory=Path("static"),
@@ -43,4 +69,7 @@ app = Litestar(
         )
     ],
     cors_config=CORSConfig(allow_origins=["*"]),
+    state=init_state,
+    logging_config=logging_config,
+    after_exception=[after_exception_handler],
 )
