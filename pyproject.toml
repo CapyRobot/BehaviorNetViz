@@ -21,7 +21,7 @@ litestar = { version = "*", extras = ["testing"] }
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^6.0.0"
-mypy = "^1.4.1"
+mypy = "^1.6.0"
 pylint = "^2.17.4"
 
 [build-system]
