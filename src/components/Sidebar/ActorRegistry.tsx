@@ -138,7 +138,7 @@ function ActorCard({
   };
 
   const handleRemoveParam = (key: string) => {
-    const { [key]: removed, ...rest } = actor.requiredInitParams;
+    const { [key]: _removed, ...rest } = actor.requiredInitParams;
     onUpdate({ requiredInitParams: rest });
   };
 
