@@ -14,7 +14,10 @@ export default function App() {
 
   useEffect(() => {
     loadAppConfig()
-      .then(setAppConfig)
+      .then((config) => {
+        setAppConfig(config);
+        document.title = config.toolConfig.toolName;
+      })
       .finally(() => setLoading(false));
   }, []);
 
