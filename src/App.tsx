@@ -52,6 +52,18 @@ export default function App() {
           <NetCanvas placeConfig={placeConfig} />
           <Inspector placeConfig={placeConfig} enableActorsFeature={toolConfig.enableActorsFeature} />
         </div>
+        <footer className="h-8 bg-gray-100 border-t border-gray-200 flex items-center justify-center px-4 text-xs text-gray-500">
+          <span>
+            © {new Date().getFullYear()}{' '}
+            <a href="https://capybot.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+              CapyBot
+            </a>
+            {' · '}
+            <a href="https://github.com/CapyRobot/BehaviorNetViz" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+              Source Code
+            </a>
+          </span>
+        </footer>
         {showRegistry && toolConfig.enableActorsFeature && (
           <ActorRegistry onClose={() => setShowRegistry(false)} />
         )}
