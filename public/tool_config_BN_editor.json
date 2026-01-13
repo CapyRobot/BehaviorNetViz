@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Tool configuration for the Petri net editor",
+
+  "toolName": "BehaviorNet Editor",
+
+  "enabledPlaceTypes": [
+    "entrypoint",
+    "resource_pool",
+    "action",
+    "wait_with_timeout",
+    "exit_logger",
+    "plain"
+  ],
+
+  "enableActorsFeature": true
+}

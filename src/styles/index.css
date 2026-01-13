@@ -1,0 +1,167 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* React Flow customizations */
+.react-flow__node {
+  cursor: pointer;
+}
+
+.react-flow__handle {
+  width: 6px;
+  height: 6px;
+  min-width: 6px;
+  min-height: 6px;
+  opacity: 0;
+  background: transparent;
+  border: none;
+}
+
+.react-flow__node:hover .react-flow__handle {
+  opacity: 0.4;
+  background: #3b82f6;
+}
+
+/* Edge arrow markers - classical Petri net style */
+.react-flow__edge-path {
+  stroke-width: 1.5;
+  stroke: #000000;
+}
+
+.react-flow__edge .react-flow__edge-path {
+  stroke: #000000;
+}
+
+/* Ensure arrow markers are black */
+.react-flow__arrowhead polyline,
+.react-flow__arrowhead polygon {
+  stroke: #000000;
+  fill: #000000;
+}
+
+/* Place node styles - classical Petri net style (white circles) */
+.place-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.place-node .place-circle {
+  @apply flex items-center justify-center rounded-full border-2 border-black bg-white;
+  width: 60px;
+  height: 60px;
+}
+
+.place-node .place-label {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 11px;
+  color: #333;
+}
+
+.place-node.selected .place-circle {
+  @apply ring-2 ring-blue-400 ring-offset-2;
+}
+
+/* Transition node styles - black solid circle */
+.transition-node {
+  @apply flex items-center justify-center bg-black rounded-full;
+  width: 20px;
+  height: 20px;
+}
+
+.transition-node.selected {
+  @apply ring-2 ring-blue-400 ring-offset-2;
+}
+
+/* Action place node styles */
+.action-place-node {
+  position: relative;
+}
+
+.action-place-node .action-label {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 11px;
+  color: #333;
+}
+
+.action-place-node .action-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.action-place-node .in-progress-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.action-place-node .place-circle {
+  @apply rounded-full border-2 border-black bg-white;
+}
+
+.action-place-node .place-circle.in-progress {
+  width: 50px;
+  height: 50px;
+}
+
+.action-place-node .place-sublabel {
+  font-size: 9px;
+  color: #666;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+/* Result places */
+.action-place-node .result-column {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.action-place-node .result-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.action-place-node .place-circle.result {
+  width: 24px;
+  height: 24px;
+}
+
+.action-place-node .result-label {
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.action-place-node .result-label.success {
+  color: #22c55e;
+}
+
+.action-place-node .result-label.failure {
+  color: #f97316;
+}
+
+.action-place-node .result-label.error {
+  color: #ef4444;
+}
+
+.action-place-node.selected .place-circle.in-progress {
+  @apply ring-2 ring-blue-400 ring-offset-2;
+}

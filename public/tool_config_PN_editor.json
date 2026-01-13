@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Tool configuration for the Petri net editor",
+
+  "toolName": "Petri Net Editor",
+
+  "enabledPlaceTypes": [
+    "plain"
+  ],
+
+  "enableActorsFeature": false
+}
