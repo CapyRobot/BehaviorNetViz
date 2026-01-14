@@ -55,6 +55,7 @@ const defaultEdgeOptions = {
 
 interface Props {
   placeConfig: PlaceConfigSchema;
+  isRuntimeMode?: boolean;
 }
 
 // Calculate best handles based on relative positions
@@ -208,7 +209,7 @@ function connectionsToEdges(
   return edges;
 }
 
-export default function NetCanvas({ placeConfig }: Props) {
+export default function NetCanvas({ placeConfig, isRuntimeMode = false }: Props) {
   const places = useNetStore((s) => s.places);
   const transitions = useNetStore((s) => s.transitions);
   const addPlace = useNetStore((s) => s.addPlace);
@@ -239,7 +240,7 @@ export default function NetCanvas({ placeConfig }: Props) {
       return {
         ...node,
         type: nodeType,
-        data: { ...node.data, placeConfig },
+        data: { ...node.data, placeConfig, isRuntimeMode },
         selected: node.id === selectedId,
       };
     });
@@ -248,7 +249,7 @@ export default function NetCanvas({ placeConfig }: Props) {
       selected: node.id === selectedId,
     }));
     return [...placeNodes, ...transitionNodes];
-  }, [places, transitions, selectedId, placeConfig]);
+  }, [places, transitions, selectedId, placeConfig, isRuntimeMode]);
 
   const edges = useMemo(
     () => connectionsToEdges(transitions, places, edgeOffsets, onControlPointChange),

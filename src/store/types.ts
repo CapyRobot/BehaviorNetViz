@@ -88,7 +88,29 @@ export interface BNetConfig {
 }
 
 // Application modes
-export type AppMode = 'editor' | 'simulator';
+export type AppMode = 'editor' | 'simulator' | 'runtime';
+
+// Runtime connection state
+export type RuntimeConnectionState = 'disconnected' | 'connecting' | 'connected' | 'error';
+
+// Runtime stats from server
+export interface RuntimeStats {
+  epoch: number;
+  transitionsFired: number;
+  tokensProcessed: number;
+  activeTokens: number;
+}
+
+// Runtime token info (simplified for display)
+export interface RuntimeTokenInfo {
+  id: number;
+  data: Record<string, unknown>;
+}
+
+// Runtime place state
+export interface RuntimePlaceState {
+  tokens: RuntimeTokenInfo[];
+}
 
 // Token in simulation - contains actors
 export interface Token {

@@ -442,3 +442,121 @@ html, body, #root {
 .probability-modal-footer .save-btn {
   @apply bg-blue-500 hover:bg-blue-400 text-white;
 }
+
+/* Runtime mode styles */
+.place-node.runtime-mode,
+.action-place-node.runtime-mode {
+  cursor: default;
+}
+
+/* Runtime token count badge */
+.token-count.runtime {
+  @apply bg-green-500;
+}
+
+/* Runtime controls in toolbar */
+.runtime-controls {
+  @apply flex items-center gap-3 ml-4;
+}
+
+.runtime-stats {
+  @apply flex items-center gap-4 text-sm;
+}
+
+.stat-item {
+  @apply flex items-center gap-1;
+}
+
+.stat-label {
+  @apply text-gray-400;
+}
+
+.stat-value {
+  @apply font-semibold text-white;
+}
+
+.runtime-actions {
+  @apply flex items-center gap-2;
+}
+
+/* Modal styles for runtime */
+.modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center;
+  z-index: 1000;
+}
+
+.modal-content {
+  @apply bg-white rounded-lg shadow-xl;
+  width: 400px;
+  max-width: 90vw;
+}
+
+.modal-content.modal-sm {
+  width: 320px;
+}
+
+.modal-header {
+  @apply flex items-center justify-between px-4 py-3 border-b border-gray-200;
+}
+
+.modal-header h2,
+.modal-header h3 {
+  @apply font-semibold text-gray-800;
+}
+
+.modal-close {
+  @apply text-gray-400 hover:text-gray-600 text-xl font-bold cursor-pointer bg-transparent border-none;
+  line-height: 1;
+}
+
+.modal-body {
+  @apply px-4 py-4;
+}
+
+.modal-footer {
+  @apply flex items-center justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50 rounded-b-lg;
+}
+
+/* Form styles */
+.form-group {
+  @apply mb-4;
+}
+
+.form-group label {
+  @apply block text-sm font-medium text-gray-700 mb-1;
+}
+
+.form-group input,
+.form-group select {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500;
+}
+
+.form-hint {
+  @apply block mt-1 text-xs text-gray-500;
+}
+
+/* Message styles */
+.error-message {
+  @apply bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm mb-3;
+}
+
+.info-message {
+  @apply bg-blue-50 border border-blue-200 text-blue-700 px-3 py-2 rounded text-sm mb-3;
+}
+
+/* Button styles */
+.btn {
+  @apply px-3 py-1.5 rounded text-sm font-medium;
+}
+
+.btn-sm {
+  @apply px-2 py-1 text-xs;
+}
+
+.btn-primary {
+  @apply bg-blue-500 hover:bg-blue-400 text-white;
+}
+
+.btn-secondary {
+  @apply bg-gray-200 hover:bg-gray-300 text-gray-700;
+}

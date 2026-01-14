@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import type { Place, Token } from '../../store/types';
 import { useNetStore } from '../../store/netStore';
+import { useRuntimeStore } from '../../store/runtimeStore';
 import type { PlaceConfigSchema } from '../../store/placeConfig';
 
 interface PlaceNodeProps {
@@ -10,6 +11,7 @@ interface PlaceNodeProps {
     place: Place;
     placeConfig?: PlaceConfigSchema;
     simulationMode?: boolean;
+    isRuntimeMode?: boolean;
     tokens?: Token[];
     onInjectToken?: (placeId: string) => void;
     onRemoveToken?: (placeId: string) => void;
@@ -18,8 +20,12 @@ interface PlaceNodeProps {
 }
 
 function PlaceNode({ id, data, selected }: PlaceNodeProps) {
-  const { place, placeConfig, simulationMode, tokens = [], onInjectToken, onRemoveToken } = data;
+  const { place, placeConfig, simulationMode, isRuntimeMode, tokens = [], onInjectToken, onRemoveToken } = data;
   const setSelection = useNetStore((s) => s.setSelection);
+
+  // Get runtime token count for this place
+  const runtimePlaceState = useRuntimeStore((s) => s.placeTokens[id]);
+  const runtimeTokenCount = runtimePlaceState?.tokens?.length ?? 0;
 
   const handleClick = () => {
     if (!simulationMode) {
@@ -43,7 +49,7 @@ function PlaceNode({ id, data, selected }: PlaceNodeProps) {
 
   return (
     <div
-      className={`place-node ${selected ? 'selected' : ''} ${simulationMode ? 'simulation-mode' : ''}`}
+      className={`place-node ${selected ? 'selected' : ''} ${simulationMode ? 'simulation-mode' : ''} ${isRuntimeMode ? 'runtime-mode' : ''}`}
       onClick={handleClick}
     >
       {/* Label above the place: type : id (or just id if hideTypeLabel) */}
@@ -53,9 +59,14 @@ function PlaceNode({ id, data, selected }: PlaceNodeProps) {
 
       {/* The white circle */}
       <div className="place-circle">
-        {/* Token count display */}
+        {/* Token count display for simulation mode */}
         {simulationMode && tokens.length > 0 && (
           <div className="token-count">{tokens.length}</div>
+        )}
+
+        {/* Token count display for runtime mode */}
+        {isRuntimeMode && runtimeTokenCount > 0 && (
+          <div className="token-count runtime">{runtimeTokenCount}</div>
         )}
 
         {/* Token control buttons in simulation mode */}

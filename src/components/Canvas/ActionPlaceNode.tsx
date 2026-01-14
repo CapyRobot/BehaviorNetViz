@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import type { Place, Token } from '../../store/types';
 import { useNetStore } from '../../store/netStore';
+import { useRuntimeStore } from '../../store/runtimeStore';
 import type { PlaceConfigSchema } from '../../store/placeConfig';
 
 interface ActionPlaceNodeProps {
@@ -10,6 +11,7 @@ interface ActionPlaceNodeProps {
     place: Place;
     placeConfig?: PlaceConfigSchema;
     simulationMode?: boolean;
+    isRuntimeMode?: boolean;
     tokens?: Record<string, Token[]>; // subplace -> tokens
     onConfigureProbability?: (placeId: string) => void;
   };
@@ -23,11 +25,15 @@ const GAP = 12;
 const RESULT_GAP = 4;
 
 function ActionPlaceNode({ id, data, selected }: ActionPlaceNodeProps) {
-  const { place, placeConfig, simulationMode, tokens = {}, onConfigureProbability } = data;
+  const { place, placeConfig, simulationMode, isRuntimeMode, tokens = {}, onConfigureProbability } = data;
   const setSelection = useNetStore((s) => s.setSelection);
 
+  // Get runtime token count for this place (all tokens including subplaces)
+  const runtimePlaceState = useRuntimeStore((s) => s.placeTokens[id]);
+  const runtimeTokenCount = runtimePlaceState?.tokens?.length ?? 0;
+
   const handleClick = () => {
-    if (!simulationMode) {
+    if (!simulationMode && !isRuntimeMode) {
       setSelection(id, 'place');
     }
   };
@@ -35,7 +41,7 @@ function ActionPlaceNode({ id, data, selected }: ActionPlaceNodeProps) {
   const typeDef = placeConfig?.placeTypes[place.type];
   const typeLabel = typeDef?.label || place.type;
 
-  // Get token counts for each subplace
+  // Get token counts for each subplace (simulation mode)
   const inProgressCount = (tokens['in_progress'] || []).length;
   const successCount = (tokens['success'] || []).length;
   const failureCount = (tokens['failure'] || []).length;
@@ -54,7 +60,7 @@ function ActionPlaceNode({ id, data, selected }: ActionPlaceNodeProps) {
 
   return (
     <div
-      className={`action-place-node ${selected ? 'selected' : ''} ${simulationMode ? 'simulation-mode' : ''}`}
+      className={`action-place-node ${selected ? 'selected' : ''} ${simulationMode ? 'simulation-mode' : ''} ${isRuntimeMode ? 'runtime-mode' : ''}`}
       onClick={handleClick}
     >
       {/* Label above */}
@@ -83,6 +89,9 @@ function ActionPlaceNode({ id, data, selected }: ActionPlaceNodeProps) {
           <div className="place-circle in-progress">
             {simulationMode && inProgressCount > 0 && (
               <div className="token-count small">{inProgressCount}</div>
+            )}
+            {isRuntimeMode && runtimeTokenCount > 0 && (
+              <div className="token-count small runtime">{runtimeTokenCount}</div>
             )}
           </div>
           <span className="place-sublabel">In Progress</span>

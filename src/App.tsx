@@ -8,17 +8,26 @@ import Toolbar from './components/Toolbar/Toolbar';
 import ActorRegistry from './components/Sidebar/ActorRegistry';
 import SimControls from './components/Simulation/SimControls';
 import LogPanel from './components/Simulation/LogPanel';
+import { ConnectionDialog } from './components/Runtime';
 import { loadAppConfig, type AppConfig } from './store/placeConfig';
 import { useSimStore } from './store/simStore';
+import { useRuntimeStore } from './store/runtimeStore';
+import { useNetStore } from './store/netStore';
 import type { AppMode } from './store/types';
 
 export default function App() {
   const [showRegistry, setShowRegistry] = useState(false);
+  const [showConnectionDialog, setShowConnectionDialog] = useState(false);
   const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [mode, setMode] = useState<AppMode>('editor');
+  const [pendingMode, setPendingMode] = useState<AppMode | null>(null);
 
   const resetSimulation = useSimStore((s) => s.reset);
+  const disconnectRuntime = useRuntimeStore((s) => s.disconnect);
+  const runtimeConnectionState = useRuntimeStore((s) => s.connectionState);
+  const places = useNetStore((s) => s.places);
+  const transitions = useNetStore((s) => s.transitions);
 
   useEffect(() => {
     loadAppConfig()
@@ -29,12 +38,54 @@ export default function App() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Reset simulation when switching modes
+  // Check if there are unsaved changes
+  const hasUnsavedChanges = () => {
+    return places.length > 0 || transitions.length > 0;
+  };
+
+  // Handle mode switching
   const handleModeChange = (newMode: AppMode) => {
-    if (newMode !== mode) {
-      resetSimulation();
-      setMode(newMode);
+    if (newMode === mode) return;
+
+    // Switching TO runtime mode
+    if (newMode === 'runtime') {
+      // Warn about unsaved changes - runtime will load config from server
+      if (hasUnsavedChanges()) {
+        const proceed = confirm(
+          'Switching to Runtime mode will load the configuration from the server. ' +
+          'Any unsaved changes in the editor will be replaced. Continue?'
+        );
+        if (!proceed) return;
+      }
+      // Show connection dialog
+      setPendingMode('runtime');
+      setShowConnectionDialog(true);
+      return;
     }
+
+    // Switching FROM runtime mode
+    if (mode === 'runtime') {
+      // Disconnect from server but keep the config for editing
+      disconnectRuntime();
+    }
+
+    resetSimulation();
+    setMode(newMode);
+  };
+
+  // Called when connection succeeds
+  const handleConnectionSuccess = () => {
+    setShowConnectionDialog(false);
+    if (pendingMode) {
+      setMode(pendingMode);
+      setPendingMode(null);
+    }
+  };
+
+  // Called when connection dialog is closed without connecting
+  const handleConnectionDialogClose = () => {
+    setShowConnectionDialog(false);
+    setPendingMode(null);
   };
 
   if (loading) {
@@ -66,14 +117,16 @@ export default function App() {
           onModeChange={handleModeChange}
         />
 
-        {mode === 'editor' ? (
+        {mode === 'editor' && (
           // Editor mode layout
           <div className="flex-1 flex overflow-hidden">
             <Sidebar placeConfig={placeConfig} />
             <NetCanvas placeConfig={placeConfig} />
             <Inspector placeConfig={placeConfig} enableActorsFeature={toolConfig.enableActorsFeature} />
           </div>
-        ) : (
+        )}
+
+        {mode === 'simulator' && (
           // Simulator mode layout
           <div className="flex-1 flex flex-col overflow-hidden">
             <SimControls placeConfig={placeConfig} />
@@ -81,6 +134,26 @@ export default function App() {
               <SimCanvas placeConfig={placeConfig} />
             </div>
             <LogPanel />
+          </div>
+        )}
+
+        {mode === 'runtime' && (
+          // Runtime mode layout - shows live net state
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {runtimeConnectionState === 'connected' ? (
+              <div className="px-4 py-2 bg-green-100 border-b border-green-300 text-green-800 text-sm flex items-center">
+                <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                Connected to runtime server
+              </div>
+            ) : (
+              <div className="px-4 py-2 bg-yellow-100 border-b border-yellow-300 text-yellow-800 text-sm flex items-center">
+                <span className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
+                Disconnected - switch mode or reconnect
+              </div>
+            )}
+            <div className="flex-1 overflow-hidden">
+              <NetCanvas placeConfig={placeConfig} isRuntimeMode={runtimeConnectionState === 'connected'} />
+            </div>
           </div>
         )}
 
@@ -99,6 +172,13 @@ export default function App() {
         {showRegistry && toolConfig.enableActorsFeature && mode === 'editor' && (
           <ActorRegistry onClose={() => setShowRegistry(false)} />
         )}
+
+        {/* Runtime connection dialog */}
+        <ConnectionDialog
+          isOpen={showConnectionDialog}
+          onClose={handleConnectionDialogClose}
+          onConnect={handleConnectionSuccess}
+        />
       </div>
     </ReactFlowProvider>
   );

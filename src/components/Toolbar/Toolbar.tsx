@@ -3,6 +3,7 @@ import { useNetStore } from '../../store/netStore';
 import { useSimStore } from '../../store/simStore';
 import { exportToJson, downloadJson } from '../../utils/configExport';
 import { importFromJson } from '../../utils/configImport';
+import { RuntimeControls } from '../Runtime';
 import type { AppMode } from '../../store/types';
 
 interface Props {
@@ -140,7 +141,11 @@ export default function Toolbar({ toolName, showActorsButton, onShowRegistry, mo
         >
           <option value="editor">Editor</option>
           <option value="simulator">Simulator</option>
+          <option value="runtime">Runtime</option>
         </select>
+
+        {/* Runtime controls when connected */}
+        {mode === 'runtime' && <RuntimeControls />}
 
         <div className="w-px h-6 bg-gray-600 mx-2" />
 
