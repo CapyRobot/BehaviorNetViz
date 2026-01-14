@@ -94,7 +94,7 @@ export default function Toolbar({ toolName, showActorsButton, onShowRegistry, mo
     <div className="h-14 bg-gray-800 text-white flex items-center px-4 justify-between">
       <div className="flex items-center space-x-2">
         <a href="https://capybot.com" target="_blank" rel="noopener noreferrer" className="flex items-center">
-          <img src="/capybot-logo.jpeg" alt="CapyBot" className="w-8 h-8 rounded" />
+          <img src={`${import.meta.env.BASE_URL}capybot-logo.jpeg`} alt="CapyBot" className="w-8 h-8 rounded" />
         </a>
         <h1 className="text-lg font-bold mr-4">{toolName}</h1>
 

@@ -42,18 +42,42 @@ export interface AppConfig {
 }
 
 let cachedConfig: AppConfig | null = null;
+let cachedConfigKey: string | null = null;
+
+// Get the config key from URL query parameter
+export function getConfigFromUrl(): string | null {
+  const params = new URLSearchParams(window.location.search);
+  const config = params.get('config');
+  if (config === 'bn' || config === 'pn') {
+    return config;
+  }
+  return null;
+}
 
 export async function loadAppConfig(): Promise<AppConfig> {
-  if (cachedConfig) return cachedConfig;
+  // Determine config file: URL param > env var > default
+  const urlConfig = getConfigFromUrl();
+  let toolConfigFile: string;
 
-  // Get config file from environment variable, default to BN editor
-  const toolConfigFile = import.meta.env.VITE_TOOL_CONFIG || 'tool_config_BN_editor.json';
+  if (urlConfig === 'pn') {
+    toolConfigFile = 'tool_config_PN_editor.json';
+  } else if (urlConfig === 'bn') {
+    toolConfigFile = 'tool_config_BN_editor.json';
+  } else {
+    toolConfigFile = import.meta.env.VITE_TOOL_CONFIG || 'tool_config_BN_editor.json';
+  }
+
+  // Return cached config only if it matches the requested config
+  if (cachedConfig && cachedConfigKey === toolConfigFile) {
+    return cachedConfig;
+  }
 
   try {
-    // Load both config files in parallel
+    // Load both config files in parallel (use BASE_URL for correct path in subdirectory deployments)
+    const baseUrl = import.meta.env.BASE_URL;
     const [toolConfigResponse, placesResponse] = await Promise.all([
-      fetch(`/${toolConfigFile}`),
-      fetch('/supported_places.json'),
+      fetch(`${baseUrl}${toolConfigFile}`),
+      fetch(`${baseUrl}supported_places.json`),
     ]);
 
     if (!toolConfigResponse.ok) {
@@ -105,6 +129,7 @@ export async function loadAppConfig(): Promise<AppConfig> {
     };
 
     cachedConfig = { toolConfig, placeConfig };
+    cachedConfigKey = toolConfigFile;
     return cachedConfig;
   } catch (error) {
     console.error('Failed to load config, using defaults:', error);

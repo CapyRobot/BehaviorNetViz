@@ -9,7 +9,8 @@ import ActorRegistry from './components/Sidebar/ActorRegistry';
 import SimControls from './components/Simulation/SimControls';
 import LogPanel from './components/Simulation/LogPanel';
 import { ConnectionDialog } from './components/Runtime';
-import { loadAppConfig, type AppConfig } from './store/placeConfig';
+import LandingPage from './components/LandingPage';
+import { loadAppConfig, getConfigFromUrl, type AppConfig } from './store/placeConfig';
 import { useSimStore } from './store/simStore';
 import { useRuntimeStore } from './store/runtimeStore';
 import { useNetStore } from './store/netStore';
@@ -19,9 +20,13 @@ export default function App() {
   const [showRegistry, setShowRegistry] = useState(false);
   const [showConnectionDialog, setShowConnectionDialog] = useState(false);
   const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
-  const [loading, setLoading] = useState(true);
   const [mode, setMode] = useState<AppMode>('editor');
   const [pendingMode, setPendingMode] = useState<AppMode | null>(null);
+
+  const configParam = getConfigFromUrl();
+
+  // Only loading when config param is present and config not yet loaded
+  const [loading, setLoading] = useState(!!configParam);
 
   const resetSimulation = useSimStore((s) => s.reset);
   const disconnectRuntime = useRuntimeStore((s) => s.disconnect);
@@ -30,13 +35,16 @@ export default function App() {
   const transitions = useNetStore((s) => s.transitions);
 
   useEffect(() => {
-    loadAppConfig()
-      .then((config) => {
-        setAppConfig(config);
-        document.title = config.toolConfig.toolName;
-      })
-      .finally(() => setLoading(false));
-  }, []);
+    // Only load editor config if a config param is specified
+    if (configParam) {
+      loadAppConfig()
+        .then((config) => {
+          setAppConfig(config);
+          document.title = config.toolConfig.toolName;
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [configParam]);
 
   // Check if there are unsaved changes
   const hasUnsavedChanges = () => {
@@ -94,6 +102,11 @@ export default function App() {
         <div className="text-gray-600">Loading configuration...</div>
       </div>
     );
+  }
+
+  // Show landing page if no config param in URL
+  if (!configParam) {
+    return <LandingPage />;
   }
 
   if (!appConfig) {
