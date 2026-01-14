@@ -69,6 +69,11 @@ export interface GlobalErrorHandler {
   mapping: ErrorMapping[];
 }
 
+// Simulation configuration for action places
+export interface SimulationConfig {
+  actionProbabilities?: Record<string, ActionOutcomeProbability>;
+}
+
 // Complete net configuration (for export/import)
 export interface BNetConfig {
   actors: ActorDefinition[];
@@ -78,4 +83,37 @@ export interface BNetConfig {
   globalErrorHandler?: GlobalErrorHandler;
   // GUI metadata - saved for visual state restoration
   edgeOffsets?: Record<string, { x: number; y: number }>;
+  // Simulation settings
+  simulation?: SimulationConfig;
+}
+
+// Application modes
+export type AppMode = 'editor' | 'simulator';
+
+// Token in simulation - contains actors
+export interface Token {
+  id: string;
+  actors: TokenActor[];
+}
+
+// Actor instance within a token
+export interface TokenActor {
+  type: string; // Actor type ID (e.g., "user::Vehicle")
+  id: string;   // Instance ID (e.g., "vehicle_1")
+  params: Record<string, unknown>;
+}
+
+// Simulation log entry
+export interface SimLogEntry {
+  timestamp: number;
+  type: 'token_inject' | 'transition_fire' | 'action_start' | 'action_complete' | 'token_move';
+  message: string;
+  details?: Record<string, unknown>;
+}
+
+// Action outcome probabilities
+export interface ActionOutcomeProbability {
+  success: number;  // 0-100
+  failure: number;  // 0-100
+  error: number;    // 0-100
 }

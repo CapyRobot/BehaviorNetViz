@@ -1,25 +1,36 @@
 import { useRef } from 'react';
 import { useNetStore } from '../../store/netStore';
+import { useSimStore } from '../../store/simStore';
 import { exportToJson, downloadJson } from '../../utils/configExport';
 import { importFromJson } from '../../utils/configImport';
+import type { AppMode } from '../../store/types';
 
 interface Props {
   toolName: string;
   showActorsButton: boolean;
   onShowRegistry: () => void;
+  mode: AppMode;
+  onModeChange: (mode: AppMode) => void;
 }
 
-export default function Toolbar({ toolName, showActorsButton, onShowRegistry }: Props) {
+export default function Toolbar({ toolName, showActorsButton, onShowRegistry, mode, onModeChange }: Props) {
   const exportConfig = useNetStore((s) => s.exportConfig);
   const importConfig = useNetStore((s) => s.importConfig);
   const clearAll = useNetStore((s) => s.clearAll);
   const places = useNetStore((s) => s.places);
   const transitions = useNetStore((s) => s.transitions);
 
+  const actionProbabilities = useSimStore((s) => s.actionProbabilities);
+  const setActionProbabilities = useSimStore((s) => s.setActionProbabilities);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExport = () => {
-    const config = exportConfig();
+    // Include simulation config with action probabilities
+    const simulationConfig = Object.keys(actionProbabilities).length > 0
+      ? { actionProbabilities }
+      : undefined;
+    const config = exportConfig(simulationConfig);
     const json = exportToJson(config);
     downloadJson(json, 'petri-net-config.json');
   };
@@ -36,6 +47,10 @@ export default function Toolbar({ toolName, showActorsButton, onShowRegistry }: 
       const text = await file.text();
       const config = importFromJson(text);
       importConfig(config);
+      // Load simulation config if present
+      if (config.simulation?.actionProbabilities) {
+        setActionProbabilities(config.simulation.actionProbabilities);
+      }
     } catch (err) {
       alert(`Failed to import: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
@@ -117,7 +132,19 @@ export default function Toolbar({ toolName, showActorsButton, onShowRegistry }: 
       </div>
 
       <div className="flex items-center space-x-2">
-        {showActorsButton && (
+        {/* Mode selector */}
+        <select
+          value={mode}
+          onChange={(e) => onModeChange(e.target.value as AppMode)}
+          className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm text-white border-none outline-none cursor-pointer"
+        >
+          <option value="editor">Editor</option>
+          <option value="simulator">Simulator</option>
+        </select>
+
+        <div className="w-px h-6 bg-gray-600 mx-2" />
+
+        {showActorsButton && mode === 'editor' && (
           <button
             onClick={onShowRegistry}
             className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 rounded text-sm"
@@ -125,12 +152,14 @@ export default function Toolbar({ toolName, showActorsButton, onShowRegistry }: 
             Actors & Actions
           </button>
         )}
-        <button
-          onClick={handleClear}
-          className="px-3 py-1.5 bg-red-600 hover:bg-red-500 rounded text-sm"
-        >
-          Clear All
-        </button>
+        {mode === 'editor' && (
+          <button
+            onClick={handleClear}
+            className="px-3 py-1.5 bg-red-600 hover:bg-red-500 rounded text-sm"
+          >
+            Clear All
+          </button>
+        )}
       </div>
 
       <div className="text-sm text-gray-400">

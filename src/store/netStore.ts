@@ -129,7 +129,7 @@ interface NetState {
   updateEdgeOffset: (edgeId: string, offset: { x: number; y: number }) => void;
 
   // Import/Export
-  exportConfig: () => BNetConfig;
+  exportConfig: (simulationConfig?: { actionProbabilities?: Record<string, { success: number; failure: number; error: number }> }) => BNetConfig;
   importConfig: (config: BNetConfig) => void;
   clearAll: () => void;
 }
@@ -396,7 +396,7 @@ export const useNetStore = create<NetState>((set, get) => ({
   },
 
   // Export
-  exportConfig: () => {
+  exportConfig: (simulationConfig?: { actionProbabilities?: Record<string, { success: number; failure: number; error: number }> }) => {
     const { places, transitions, actors, actions, globalErrorHandler, edgeOffsets } = get();
     return {
       actors,
@@ -405,6 +405,7 @@ export const useNetStore = create<NetState>((set, get) => ({
       transitions,
       globalErrorHandler,
       edgeOffsets,
+      simulation: simulationConfig,
     };
   },
 

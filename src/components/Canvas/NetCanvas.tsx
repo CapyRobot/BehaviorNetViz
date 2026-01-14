@@ -309,8 +309,20 @@ export default function NetCanvas({ placeConfig }: Props) {
           }
         }
 
-        addConnection(actualFromId, transitionId);
-        addConnection(transitionId, toNodeId);
+        // Check if from is an action place being dragged from a non-subplace handle
+        // Action places' In Progress circle should only RECEIVE arcs, not emit them
+        const fromIsAction = fromNode.type === 'action';
+        const isFromSubplace = actualFromId.includes('::');
+
+        if (fromIsAction && !isFromSubplace) {
+          // Dragging from action's In Progress to another place:
+          // Swap direction: toNode -> transition -> action place (In Progress receives)
+          addConnection(toNodeId, transitionId);
+          addConnection(transitionId, fromNodeId);
+        } else {
+          addConnection(actualFromId, transitionId);
+          addConnection(transitionId, toNodeId);
+        }
         return;
       }
 

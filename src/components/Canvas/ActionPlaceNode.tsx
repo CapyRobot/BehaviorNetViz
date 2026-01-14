@@ -1,12 +1,18 @@
 import { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import type { Place } from '../../store/types';
+import type { Place, Token } from '../../store/types';
 import { useNetStore } from '../../store/netStore';
 import type { PlaceConfigSchema } from '../../store/placeConfig';
 
 interface ActionPlaceNodeProps {
   id: string;
-  data: { place: Place; placeConfig?: PlaceConfigSchema };
+  data: {
+    place: Place;
+    placeConfig?: PlaceConfigSchema;
+    simulationMode?: boolean;
+    tokens?: Record<string, Token[]>; // subplace -> tokens
+    onConfigureProbability?: (placeId: string) => void;
+  };
   selected?: boolean;
 }
 
@@ -17,15 +23,23 @@ const GAP = 12;
 const RESULT_GAP = 4;
 
 function ActionPlaceNode({ id, data, selected }: ActionPlaceNodeProps) {
-  const { place, placeConfig } = data;
+  const { place, placeConfig, simulationMode, tokens = {}, onConfigureProbability } = data;
   const setSelection = useNetStore((s) => s.setSelection);
 
   const handleClick = () => {
-    setSelection(id, 'place');
+    if (!simulationMode) {
+      setSelection(id, 'place');
+    }
   };
 
   const typeDef = placeConfig?.placeTypes[place.type];
   const typeLabel = typeDef?.label || place.type;
+
+  // Get token counts for each subplace
+  const inProgressCount = (tokens['in_progress'] || []).length;
+  const successCount = (tokens['success'] || []).length;
+  const failureCount = (tokens['failure'] || []).length;
+  const errorCount = (tokens['error'] || []).length;
 
   // Calculate positions for handles
   const inProgressCenterX = IN_PROGRESS_SIZE / 2;
@@ -40,7 +54,7 @@ function ActionPlaceNode({ id, data, selected }: ActionPlaceNodeProps) {
 
   return (
     <div
-      className={`action-place-node ${selected ? 'selected' : ''}`}
+      className={`action-place-node ${selected ? 'selected' : ''} ${simulationMode ? 'simulation-mode' : ''}`}
       onClick={handleClick}
     >
       {/* Label above */}
@@ -48,25 +62,56 @@ function ActionPlaceNode({ id, data, selected }: ActionPlaceNodeProps) {
         {typeLabel} : {place.id}
       </div>
 
+      {/* Gear button for configuring probabilities in simulation mode */}
+      {simulationMode && onConfigureProbability && (
+        <button
+          className="gear-button nodrag nopan"
+          onClick={(e) => {
+            e.stopPropagation();
+            onConfigureProbability(place.id);
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+          title="Configure action probabilities"
+        >
+          ⚙
+        </button>
+      )}
+
       <div className="action-content">
         {/* In Progress place - receives incoming arcs */}
         <div className="in-progress-wrapper">
-          <div className="place-circle in-progress" />
+          <div className="place-circle in-progress">
+            {simulationMode && inProgressCount > 0 && (
+              <div className="token-count small">{inProgressCount}</div>
+            )}
+          </div>
           <span className="place-sublabel">In Progress</span>
         </div>
 
         {/* Result places - outgoing arcs only */}
         <div className="result-column">
           <div className="result-row">
-            <div className="place-circle result" />
+            <div className="place-circle result">
+              {simulationMode && successCount > 0 && (
+                <div className="token-count tiny">{successCount}</div>
+              )}
+            </div>
             <span className="result-label success">S</span>
           </div>
           <div className="result-row">
-            <div className="place-circle result" />
+            <div className="place-circle result">
+              {simulationMode && failureCount > 0 && (
+                <div className="token-count tiny">{failureCount}</div>
+              )}
+            </div>
             <span className="result-label failure">F</span>
           </div>
           <div className="result-row">
-            <div className="place-circle result" />
+            <div className="place-circle result">
+              {simulationMode && errorCount > 0 && (
+                <div className="token-count tiny">{errorCount}</div>
+              )}
+            </div>
             <span className="result-label error">E</span>
           </div>
         </div>

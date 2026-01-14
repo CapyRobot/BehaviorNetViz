@@ -54,7 +54,7 @@ html, body, #root {
 }
 
 .place-node .place-circle {
-  @apply flex items-center justify-center rounded-full border-2 border-black bg-white;
+  @apply flex items-center justify-center rounded-full border-2 border-black bg-white relative;
   width: 60px;
   height: 60px;
 }
@@ -82,6 +82,14 @@ html, body, #root {
 
 .transition-node.selected {
   @apply ring-2 ring-blue-400 ring-offset-2;
+}
+
+/* Priority label inside transition */
+.transition-priority {
+  @apply text-white font-bold;
+  font-size: 8px;
+  line-height: 1;
+  user-select: none;
 }
 
 /* Action place node styles */
@@ -112,7 +120,7 @@ html, body, #root {
 }
 
 .action-place-node .place-circle {
-  @apply rounded-full border-2 border-black bg-white;
+  @apply rounded-full border-2 border-black bg-white relative flex items-center justify-center;
 }
 
 .action-place-node .place-circle.in-progress {
@@ -164,4 +172,273 @@ html, body, #root {
 
 .action-place-node.selected .place-circle.in-progress {
   @apply ring-2 ring-blue-400 ring-offset-2;
+}
+
+/* Simulation mode styles */
+
+/* Token count display */
+.token-count {
+  @apply absolute bg-blue-500 text-white rounded-full flex items-center justify-center font-bold;
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.token-count.small {
+  width: 20px;
+  height: 20px;
+  font-size: 10px;
+}
+
+.token-count.tiny {
+  width: 14px;
+  height: 14px;
+  font-size: 8px;
+}
+
+/* Inject button for entrypoint places */
+.inject-button {
+  @apply absolute bg-green-500 hover:bg-green-400 text-white rounded-full flex items-center justify-center font-bold cursor-pointer border-none;
+  width: 20px;
+  height: 20px;
+  font-size: 16px;
+  top: -8px;
+  right: -8px;
+  z-index: 100;
+  line-height: 1;
+  pointer-events: all;
+}
+
+.inject-button:hover {
+  transform: scale(1.1);
+}
+
+/* Remove button for places with tokens */
+.remove-button {
+  @apply absolute bg-red-500 hover:bg-red-400 text-white rounded-full flex items-center justify-center font-bold cursor-pointer border-none;
+  width: 20px;
+  height: 20px;
+  font-size: 16px;
+  top: -8px;
+  left: -8px;
+  z-index: 100;
+  line-height: 1;
+  pointer-events: all;
+}
+
+.remove-button:hover {
+  transform: scale(1.1);
+}
+
+/* Fire button for enabled transitions */
+.fire-button {
+  @apply absolute bg-green-500 hover:bg-green-400 text-white rounded-full flex items-center justify-center cursor-pointer border-none;
+  width: 18px;
+  height: 18px;
+  font-size: 8px;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  padding-left: 2px;
+  pointer-events: all;
+}
+
+.fire-button:hover {
+  transform: translateX(-50%) scale(1.1);
+}
+
+/* Enabled transition highlight */
+.transition-node.enabled {
+  @apply bg-green-600;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+}
+
+/* Simulation mode cursor changes */
+.place-node.simulation-mode,
+.action-place-node.simulation-mode,
+.transition-node.simulation-mode {
+  cursor: default;
+}
+
+/* Simulation controls panel */
+.sim-controls {
+  @apply bg-gray-100 border-b border-gray-200 px-4 py-2 flex items-center gap-4;
+}
+
+.sim-controls button {
+  @apply px-3 py-1.5 rounded text-sm font-medium;
+}
+
+.sim-controls .play-btn {
+  @apply bg-green-500 hover:bg-green-400 text-white;
+}
+
+.sim-controls .pause-btn {
+  @apply bg-yellow-500 hover:bg-yellow-400 text-white;
+}
+
+.sim-controls .step-btn {
+  @apply bg-blue-500 hover:bg-blue-400 text-white;
+}
+
+.sim-controls .reset-btn {
+  @apply bg-red-500 hover:bg-red-400 text-white;
+}
+
+/* Log panel */
+.log-panel {
+  @apply bg-gray-900 text-gray-100 font-mono text-xs overflow-auto;
+  min-height: 150px;
+  max-height: 200px;
+}
+
+.log-panel .log-entry {
+  @apply px-3 py-1 border-b border-gray-800;
+}
+
+.log-panel .log-entry .timestamp {
+  @apply text-gray-500 mr-2;
+}
+
+.log-panel .log-entry.token_inject {
+  @apply text-green-400;
+}
+
+.log-panel .log-entry.transition_fire {
+  @apply text-blue-400;
+}
+
+.log-panel .log-entry.action_start {
+  @apply text-yellow-400;
+}
+
+.log-panel .log-entry.action_complete {
+  @apply text-purple-400;
+}
+
+.log-panel .log-entry.token_move {
+  @apply text-cyan-400;
+}
+
+/* Gear button for action place probability configuration */
+.gear-button {
+  @apply absolute bg-gray-600 hover:bg-gray-500 text-white rounded-full flex items-center justify-center cursor-pointer border-none;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  bottom: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  line-height: 1;
+  pointer-events: all;
+}
+
+.gear-button:hover {
+  transform: translateX(-50%) scale(1.1);
+}
+
+/* Action probability modal */
+.probability-modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center;
+  z-index: 1000;
+}
+
+.probability-modal {
+  @apply bg-white rounded-lg shadow-xl;
+  width: 400px;
+  max-width: 90vw;
+}
+
+.probability-modal-header {
+  @apply flex items-center justify-between px-4 py-3 border-b border-gray-200;
+}
+
+.probability-modal-header h3 {
+  @apply font-semibold text-gray-800;
+  font-size: 14px;
+}
+
+.probability-modal-header .close-btn {
+  @apply text-gray-400 hover:text-gray-600 text-xl font-bold cursor-pointer bg-transparent border-none;
+  line-height: 1;
+}
+
+.probability-modal-content {
+  @apply px-4 py-4;
+}
+
+.probability-row {
+  @apply flex items-center gap-3 mb-3;
+}
+
+.probability-row label {
+  @apply font-medium;
+  width: 60px;
+  font-size: 13px;
+}
+
+.probability-row label.success-label {
+  @apply text-green-600;
+}
+
+.probability-row label.failure-label {
+  @apply text-orange-500;
+}
+
+.probability-row label.error-label {
+  @apply text-red-500;
+}
+
+.probability-slider {
+  @apply flex-1 h-2 rounded-lg appearance-none cursor-pointer;
+  background: #e5e7eb;
+}
+
+.probability-slider::-webkit-slider-thumb {
+  @apply appearance-none w-4 h-4 rounded-full;
+  background: #6b7280;
+}
+
+.probability-slider.success::-webkit-slider-thumb {
+  background: #22c55e;
+}
+
+.probability-slider.failure::-webkit-slider-thumb {
+  background: #f97316;
+}
+
+.probability-slider.error::-webkit-slider-thumb {
+  background: #ef4444;
+}
+
+.probability-value {
+  @apply text-gray-600 font-mono;
+  width: 40px;
+  text-align: right;
+  font-size: 13px;
+}
+
+.probability-modal-footer {
+  @apply flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-gray-50 rounded-b-lg;
+}
+
+.probability-modal-footer button {
+  @apply px-3 py-1.5 rounded text-sm font-medium;
+}
+
+.probability-modal-footer .reset-btn {
+  @apply text-gray-600 hover:text-gray-800 bg-transparent;
+}
+
+.probability-modal-footer .cancel-btn {
+  @apply bg-gray-200 hover:bg-gray-300 text-gray-700;
+}
+
+.probability-modal-footer .save-btn {
+  @apply bg-blue-500 hover:bg-blue-400 text-white;
 }
